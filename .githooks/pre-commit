@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+echo "Running detekt check..."
+OUTPUT="/tmp/detekt-main-$(date +%s)"
+make lint.main > $OUTPUT
+EXIT_CODE=$?
+if [ $EXIT_CODE -ne 0 ]; then
+  cat $OUTPUT
+  rm $OUTPUT
+  echo "**********************************************************"
+  echo "                   Detekt failed                          "
+  echo " make fmt.main を実行するか、直接修正してからコミットしてください "
+  echo "**********************************************************"
+  exit $EXIT_CODE
+fi
+rm $OUTPUT
+
+OUTPUT="/tmp/detekt-test-$(date +%s)"
+make lint.test > $OUTPUT
+EXIT_CODE=$?
+if [ $EXIT_CODE -ne 0 ]; then
+  cat $OUTPUT
+  rm $OUTPUT
+  echo "**********************************************************"
+  echo "                   Detekt failed                          "
+  echo " make fmt.test を実行するか、直接修正してからコミットしてください "
+  echo "**********************************************************"
+  exit $EXIT_CODE
+fi
+rm $OUTPUT
