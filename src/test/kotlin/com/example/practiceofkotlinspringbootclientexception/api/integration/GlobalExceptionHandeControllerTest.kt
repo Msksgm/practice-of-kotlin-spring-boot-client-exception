@@ -85,4 +85,38 @@ class GlobalExceptionHandeControllerTest(
         assertThat(actualStatus).isEqualTo(expectedStatus)
         JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.STRICT)
     }
+
+    @Test
+    fun `HttpMediaTypeNotSupportedException サポートされていない content-type でリクエストを送った`() {
+        /**
+         * given:
+         */
+        val url = "/articles"
+
+        /**
+         * when:
+         * - サポートされていない content-type（text/plain） でリクエストを送る
+         */
+        val response = mockMvc.get("$url/already-exists-slug") {
+            contentType = MediaType.TEXT_PLAIN
+        }.andReturn().response
+        val actualStatus = response.status
+        val actualResponseBody = response.contentAsString
+
+        /**
+         * then:
+         */
+        val expectedStatus = HttpStatus.UNSUPPORTED_MEDIA_TYPE.value()
+        val expectedResponseBody = """
+            {
+                "errors": {
+                    "body": [
+                        "該当エンドポイントでtext/plainのリクエストはサポートされていません"
+                    ]
+                }
+            }
+        """.trimIndent()
+        assertThat(actualStatus).isEqualTo(expectedStatus)
+        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.STRICT)
+    }
 }

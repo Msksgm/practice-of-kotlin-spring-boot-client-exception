@@ -4,6 +4,7 @@ import com.example.practiceofkotlinspringbootclientexception.presentation.model.
 import com.example.practiceofkotlinspringbootclientexception.presentation.model.GenericErrorModelErrors
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.HttpMediaTypeNotSupportedException
 import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
@@ -55,6 +56,26 @@ class GlobalExceptionHandleController {
                 ),
             ),
             HttpStatus.METHOD_NOT_ALLOWED
+        )
+    }
+
+    /**
+     * エンドポイントが想定していない Content-Type でリクエストされた時にエラーレスポンスを作成するメソッド
+     *
+     * @param e
+     * @return 415 エラーのレスポンス
+     */
+    @ExceptionHandler(HttpMediaTypeNotSupportedException::class)
+    fun noHttpMediaTypeNotSupportedException(
+        e: HttpMediaTypeNotSupportedException
+    ): ResponseEntity<GenericErrorModel> {
+        return ResponseEntity<GenericErrorModel>(
+            GenericErrorModel(
+                errors = GenericErrorModelErrors(
+                    body = listOf("該当エンドポイントで${e.contentType}のリクエストはサポートされていません")
+                ),
+            ),
+            HttpStatus.UNSUPPORTED_MEDIA_TYPE
         )
     }
 }
