@@ -4,6 +4,7 @@ import com.example.practiceofkotlinspringbootclientexception.presentation.model.
 import com.example.practiceofkotlinspringbootclientexception.presentation.model.GenericErrorModelErrors
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.HttpMediaTypeNotSupportedException
 import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -76,6 +77,27 @@ class GlobalExceptionHandleController {
                 ),
             ),
             HttpStatus.UNSUPPORTED_MEDIA_TYPE
+        )
+    }
+
+    /**
+     * httpMessageNotReadableExceptionHandler
+     *
+     * API スキーマが想定していないリクエストだった場合に発生させるエラーレスポンスを作成するメソッド
+     *
+     * @param e
+     * @return 400 エラーのレスポンス
+     */
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    @Suppress("UnusedParameter")
+    fun httpMessageNotReadableExceptionHandler(e: HttpMessageNotReadableException): ResponseEntity<GenericErrorModel> {
+        return ResponseEntity<GenericErrorModel>(
+            GenericErrorModel(
+                errors = GenericErrorModelErrors(
+                    body = listOf("エンドポイントが想定していない形式または型のリクエストが送られました")
+                ),
+            ),
+            HttpStatus.BAD_REQUEST
         )
     }
 }

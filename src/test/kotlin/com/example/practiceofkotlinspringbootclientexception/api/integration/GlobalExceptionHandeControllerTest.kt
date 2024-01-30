@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.put
 
 @SpringBootTest
@@ -112,6 +113,49 @@ class GlobalExceptionHandeControllerTest(
                 "errors": {
                     "body": [
                         "該当エンドポイントでtext/plainのリクエストはサポートされていません"
+                    ]
+                }
+            }
+        """.trimIndent()
+        assertThat(actualStatus).isEqualTo(expectedStatus)
+        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.STRICT)
+    }
+
+    @Test
+    fun `HttpMessageNotReadableException エンドポイントが想定していない形式または型のリクエストが送られた`() {
+        /**
+         * given:
+         * - JSON のフォーマットが不正（閉じ括弧が欠けている）
+         */
+        val url = "/articles"
+        val requestBody = """
+            {
+                "article": {
+                    "title": "new-title",
+                    "body": "new-body",
+                    "description": "new-description"
+            }
+        """.trimIndent()
+
+        /**
+         * when:
+         */
+        val response = mockMvc.post(url) {
+            contentType = MediaType.APPLICATION_JSON
+            content = requestBody
+        }.andReturn().response
+        val actualStatus = response.status
+        val actualResponseBody = response.contentAsString
+
+        /**
+         * then:
+         */
+        val expectedStatus = HttpStatus.BAD_REQUEST.value()
+        val expectedResponseBody = """
+            {
+                "errors": {
+                    "body": [
+                        "エンドポイントが想定していない形式または型のリクエストが送られました"
                     ]
                 }
             }
