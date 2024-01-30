@@ -5,8 +5,10 @@ import com.example.practiceofkotlinspringbootclientexception.presentation.model.
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.validation.FieldError
 import org.springframework.web.HttpMediaTypeNotSupportedException
 import org.springframework.web.HttpRequestMethodNotSupportedException
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.servlet.resource.NoResourceFoundException
@@ -95,6 +97,31 @@ class GlobalExceptionHandleController {
             GenericErrorModel(
                 errors = GenericErrorModelErrors(
                     body = listOf("エンドポイントが想定していない形式または型のリクエストが送られました")
+                ),
+            ),
+            HttpStatus.BAD_REQUEST
+        )
+    }
+
+    /**
+     * リクエストのバリデーションエラーが発生した場合に発生させるエラーレスポンスを作成するメソッド
+     *
+     * @param e
+     * @return 400 エラーのレスポンス
+     */
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    fun methodArgumentNotValidExceptionHandler(e: MethodArgumentNotValidException): ResponseEntity<GenericErrorModel> {
+        // エラーメッセージ本文の作成。FieldError の場合は、フィールド名を含める
+        val messages = e.bindingResult.allErrors.map {
+            when (it) {
+                is FieldError -> "${it.field}は${it.defaultMessage}"
+                else -> it.defaultMessage.toString()
+            }
+        }
+        return ResponseEntity<GenericErrorModel>(
+            GenericErrorModel(
+                errors = GenericErrorModelErrors(
+                    body = messages
                 ),
             ),
             HttpStatus.BAD_REQUEST

@@ -7,10 +7,10 @@ import jakarta.validation.constraints.NotNull
 /**
  * 新規記事作成の null 許容型のリクエストモデル
  *
- * @property newArticle
+ * @property article
  */
 data class NewArticleRequest(
     @field:Valid
     @field:NotNull
-    @field:JsonProperty("article", required = true) val newArticle: NewArticle? = null
+    @field:JsonProperty("article", required = true) val article: NewArticle? = null
 )

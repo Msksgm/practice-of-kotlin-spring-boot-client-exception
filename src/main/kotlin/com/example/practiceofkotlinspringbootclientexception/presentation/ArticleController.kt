@@ -40,9 +40,9 @@ class ArticleController {
             SingleArticleResponse(
                 article = Article(
                     slug = "new-slug",
-                    title = newArticleRequest.newArticle!!.title!!,
-                    body = newArticleRequest.newArticle.body!!,
-                    description = newArticleRequest.newArticle.description!!,
+                    title = newArticleRequest.article!!.title!!,
+                    body = newArticleRequest.article.body!!,
+                    description = newArticleRequest.article.description!!,
                 )
             ),
             HttpStatus.OK

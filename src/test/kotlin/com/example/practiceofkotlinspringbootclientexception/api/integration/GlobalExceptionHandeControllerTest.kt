@@ -163,4 +163,56 @@ class GlobalExceptionHandeControllerTest(
         assertThat(actualStatus).isEqualTo(expectedStatus)
         JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.STRICT)
     }
+
+    @Test
+    fun `MethodArgumentNotValidException リクエストのバリデーションエラー`() {
+        /**
+         * given:
+         * - バリデーションエラーのリクエストボディ
+         */
+        val url = "/articles"
+        val invalidTitle = "a".repeat(33)
+        val invalidDescription = "a".repeat(1025)
+        val invalidBody = "a".repeat(2049)
+        val requestBody = """
+            {
+                "article": {
+                    "title": "$invalidTitle",
+                    "body": "$invalidBody",
+                    "description": "$invalidDescription"
+                }
+            }
+        """.trimIndent()
+
+        /**
+         * when:
+         */
+        val response = mockMvc.post(url) {
+            contentType = MediaType.APPLICATION_JSON
+            content = requestBody
+        }.andReturn().response
+        val actualStatus = response.status
+        val actualResponseBody = response.contentAsString
+
+        println(actualResponseBody)
+
+        /**
+         * then:
+         */
+        val expectedStatus = HttpStatus.BAD_REQUEST.value()
+        val expectedResponseBody = """
+            {
+                "errors": {
+                    "body": [
+                        "article.descriptionは0文字以上1024文字以下です",
+                        "article.bodyは0文字以上2048文字以下です",
+                        "article.titleは0文字以上32文字以下です"
+                    ]
+                }
+            }
+        """.trimIndent()
+
+        assertThat(actualStatus).isEqualTo(expectedStatus)
+        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.NON_EXTENSIBLE)
+    }
 }
