@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.put
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -44,6 +45,39 @@ class GlobalExceptionHandeControllerTest(
                 "errors": {
                     "body": [
                         "該当するエンドポイントがありませんでした"
+                    ]
+                }
+            }
+        """.trimIndent()
+        assertThat(actualStatus).isEqualTo(expectedStatus)
+        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.STRICT)
+    }
+
+    @Test
+    fun `HttpRequestMethodNotSupportedException 該当するエンドポイントに許可されていないリクエストを送った`() {
+        /**
+         * given:
+         */
+        val url = "/articles"
+
+        /**
+         * when:
+         */
+        val response = mockMvc.put(url) {
+            contentType = MediaType.APPLICATION_JSON
+        }.andReturn().response
+        val actualStatus = response.status
+        val actualResponseBody = response.contentAsString
+
+        /**
+         * then:
+         */
+        val expectedStatus = HttpStatus.METHOD_NOT_ALLOWED.value()
+        val expectedResponseBody = """
+            {
+                "errors": {
+                    "body": [
+                        "該当エンドポイントでPUTメソッドの処理は許可されていません"
                     ]
                 }
             }

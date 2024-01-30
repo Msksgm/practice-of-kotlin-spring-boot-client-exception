@@ -4,6 +4,7 @@ import com.example.practiceofkotlinspringbootclientexception.presentation.model.
 import com.example.practiceofkotlinspringbootclientexception.presentation.model.GenericErrorModelErrors
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.servlet.resource.NoResourceFoundException
@@ -34,6 +35,26 @@ class GlobalExceptionHandleController {
                 ),
             ),
             HttpStatus.NOT_FOUND
+        )
+    }
+
+    /**
+     * 許可されていないメソッドでリクエストを送った時のエラーレスポンスを作成するメソッド
+     *
+     * @param e
+     * @return 405 エラーのレスポンス
+     */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
+    fun noHttpRequestMethodNotSupportedExceptionHandler(
+        e: HttpRequestMethodNotSupportedException
+    ): ResponseEntity<GenericErrorModel> {
+        return ResponseEntity<GenericErrorModel>(
+            GenericErrorModel(
+                errors = GenericErrorModelErrors(
+                    body = listOf("該当エンドポイントで${e.method}メソッドの処理は許可されていません")
+                ),
+            ),
+            HttpStatus.METHOD_NOT_ALLOWED
         )
     }
 }
